@@ -1,16 +1,14 @@
 export interface DataItem {
   id: number;
   name: string;
-  email: string;
-  status: 'active' | 'inactive' | 'pending';
-  category: 'tech' | 'business' | 'design';
-  date: string;
-  initials: string;
+  state: string;
+  cocNumber: string; // Replaced category with cocNumber
+  measure: string; // Added measure field
+  [year: string]: string | number; // Allow dynamic year properties
 }
 
 export interface FilterState {
-  search: string;
-  status: string;
-  category: string;
-  date: string;
+  measure: string; // Replaced search with measure
+  state: string;
+  cocNumber: string; // Replaced category with cocNumber
 }

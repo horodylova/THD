@@ -9,49 +9,32 @@ import { DataItem, FilterState } from '@/types';
 
 export default function DataTable() {
   const [filters, setFilters] = useState<FilterState>({
-    search: '',
-    status: '',
-    category: '',
-    date: '',
+    measure: '',
+    state: '',
+    cocNumber: '',
   });
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // State for applied filters (used for data filtering)
+  const [appliedFilters, setAppliedFilters] = useState<FilterState>({
+    measure: '',
+    state: '',
+    cocNumber: '',
+  });
+
+  const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Sample data - replace with your data source
-  const [data] = useState<DataItem[]>([
-    {
-      id: 1,
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      status: 'active',
-      category: 'tech',
-      date: '2024-01-15',
-      initials: 'JD',
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      email: 'jane.smith@example.com',
-      status: 'pending',
-      category: 'business',
-      date: '2024-01-20',
-      initials: 'JS',
-    },
-    // Add more sample data here if needed
-  ]);
+  // Initial empty data
+  const [data] = useState<DataItem[]>([]);
 
   const getFilteredData = () => {
     return data.filter((item) => {
-      const matchesSearch =
-        !filters.search ||
-        item.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-        item.email.toLowerCase().includes(filters.search.toLowerCase());
+      const matchesMeasure = !appliedFilters.measure || item.name === appliedFilters.measure;
 
-      const matchesStatus = !filters.status || item.status === filters.status;
-      const matchesCategory = !filters.category || item.category === filters.category;
-      const matchesDate = !filters.date || item.date >= filters.date;
+      const matchesState = !appliedFilters.state || item.state === appliedFilters.state;
+      const matchesCoC = !appliedFilters.cocNumber || item.cocNumber === appliedFilters.cocNumber;
 
-      return matchesSearch && matchesStatus && matchesCategory && matchesDate;
+      return matchesMeasure && matchesState && matchesCoC;
     });
   };
 
@@ -60,13 +43,19 @@ export default function DataTable() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
 
+  const handleApplyFilters = () => {
+    setAppliedFilters(filters);
+    setCurrentPage(1);
+  };
+
   const handleResetFilters = () => {
-    setFilters({
-      search: '',
-      status: '',
-      category: '',
-      date: '',
-    });
+    const emptyFilters = {
+      measure: '',
+      state: '',
+      cocNumber: '',
+    };
+    setFilters(emptyFilters);
+    setAppliedFilters(emptyFilters);
     setCurrentPage(1);
   };
 
@@ -77,9 +66,8 @@ export default function DataTable() {
         <DataTableFilters
           filters={filters}
           setFilters={setFilters}
-          itemsPerPage={itemsPerPage}
-          setItemsPerPage={setItemsPerPage}
           onReset={handleResetFilters}
+          onApply={handleApplyFilters}
         />
         <DataTableContent
           data={paginatedData}
