@@ -14,7 +14,7 @@ export default function DataTableContent({
   itemsPerPage,
   totalItems,
 }: DataTableContentProps) {
-  // Generate array of years from 2007 to 2024
+   
   const years = Array.from({ length: 2024 - 2007 + 1 }, (_, i) => 2007 + i);
 
   return (

@@ -7,14 +7,17 @@ import DataTableContent from './DataTableContent';
 import DataTablePagination from './DataTablePagination';
 import { DataItem, FilterState } from '@/types';
 
-export default function DataTable() {
+interface DataTableProps {
+  initialData?: DataItem[];
+}
+
+export default function DataTable({ initialData = [] }: DataTableProps) {
   const [filters, setFilters] = useState<FilterState>({
     measure: '',
     state: '',
     cocNumber: '',
   });
-
-  // State for applied filters (used for data filtering)
+ 
   const [appliedFilters, setAppliedFilters] = useState<FilterState>({
     measure: '',
     state: '',
@@ -24,12 +27,34 @@ export default function DataTable() {
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Initial empty data
-  const [data] = useState<DataItem[]>([]);
+ 
+  const [data] = useState<DataItem[]>(initialData);
+ 
+  const uniqueStates = React.useMemo(() => {
+    const states = new Set(data.map(item => item.state));
+    return Array.from(states).filter(Boolean).sort();
+  }, [data]);
+
+  const availableCoCs = React.useMemo(() => {
+    if (!filters.state) return [];
+    const cocs = new Set(
+      data
+        .filter(item => item.state === filters.state)
+        .map(item => item.cocNumber)
+    );
+    return Array.from(cocs).filter(Boolean).sort();
+  }, [data, filters.state]);
+
+  
+  const selectedCoC = React.useMemo(() => {
+    if (!filters.cocNumber) return { name: '', category: '' };
+    const item = data.find(d => d.cocNumber === filters.cocNumber);
+    return item ? { name: item.name, category: item.cocCategory } : { name: '', category: '' };
+  }, [data, filters.cocNumber]);
 
   const getFilteredData = () => {
     return data.filter((item) => {
-      const matchesMeasure = !appliedFilters.measure || item.name === appliedFilters.measure;
+      const matchesMeasure = !appliedFilters.measure || item.measure === appliedFilters.measure; // Fixed: check against item.measure
 
       const matchesState = !appliedFilters.state || item.state === appliedFilters.state;
       const matchesCoC = !appliedFilters.cocNumber || item.cocNumber === appliedFilters.cocNumber;
@@ -68,6 +93,10 @@ export default function DataTable() {
           setFilters={setFilters}
           onReset={handleResetFilters}
           onApply={handleApplyFilters}
+          availableStates={uniqueStates}
+          availableCoCs={availableCoCs}
+          cocName={selectedCoC.name}
+          cocCategory={selectedCoC.category}
         />
         <DataTableContent
           data={paginatedData}

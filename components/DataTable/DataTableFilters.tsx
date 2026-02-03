@@ -1,7 +1,5 @@
 import React from 'react';
 import { FilterState } from '@/types';
-import { US_STATES } from '@/constants/states';
-import { COC_NUMBERS } from '@/constants/coc_numbers';
 import { MEASURES } from '@/constants/measures';
 
 interface DataTableFiltersProps {
@@ -9,6 +7,10 @@ interface DataTableFiltersProps {
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
   onReset: () => void;
   onApply: () => void;
+  availableStates: string[];
+  availableCoCs: string[];
+  cocName: string;
+  cocCategory: string;
 }
 
 export default function DataTableFilters({
@@ -16,19 +18,20 @@ export default function DataTableFilters({
   setFilters,
   onReset,
   onApply,
+  availableStates,
+  availableCoCs,
+  cocName,
+  cocCategory,
 }: DataTableFiltersProps) {
-  // Get available CoC numbers based on selected state
-  const availableCoCs = filters.state ? COC_NUMBERS[filters.state] || [] : [];
-
+  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    
-    // If state changes, reset cocNumber
+     
     if (name === 'state') {
       setFilters((prev) => ({ 
         ...prev, 
         [name]: value,
-        cocNumber: '' // Reset CoC number when state changes
+        cocNumber: ''  
       }));
     } else {
       setFilters((prev) => ({ ...prev, [name]: value }));
@@ -42,9 +45,9 @@ export default function DataTableFilters({
         Filters
       </h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         {/* Measure Filter */}
-        <div className="col-span-1 md:col-span-2 group">
+        <div className="group">
           <label className="block text-sm font-medium text-gray-700 mb-2 transition-colors group-hover:text-indigo-600">Measure</label>
           <select
             name="measure"
@@ -71,7 +74,7 @@ export default function DataTableFilters({
             className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white transition-all duration-200 hover:border-indigo-300"
           >
             <option value="">Select State</option>
-            {US_STATES.map((state) => (
+            {availableStates.map((state) => (
               <option key={state} value={state}>
                 {state}
               </option>
@@ -79,7 +82,7 @@ export default function DataTableFilters({
           </select>
         </div>
 
-        {/* CoC Number Filter (Replaces Category) */}
+        {/* CoC Number Filter */}
         <div className="group">
           <label className="block text-sm font-medium text-gray-700 mb-2 transition-colors group-hover:text-indigo-600">CoC Number</label>
           <select
@@ -102,52 +105,51 @@ export default function DataTableFilters({
           </select>
         </div>
 
-        {/* CoC Name (Auto-filled) */}
+        {/* CoC Name (Read-only) */}
         <div className="group">
-          <label className="block text-sm font-medium text-gray-700 mb-2">CoC Name</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2 transition-colors group-hover:text-indigo-600">CoC Name</label>
           <input
             type="text"
+            value={cocName}
             readOnly
-            disabled
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
             placeholder="Auto-filled"
+            className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-default focus:ring-0 focus:border-gray-200"
           />
         </div>
 
-        {/* CoC Category (Auto-filled) */}
+        {/* CoC Category (Read-only) */}
         <div className="group">
-          <label className="block text-sm font-medium text-gray-700 mb-2">CoC Category</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2 transition-colors group-hover:text-indigo-600">CoC Category</label>
           <input
             type="text"
+            value={cocCategory}
             readOnly
-            disabled
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
             placeholder="Auto-filled"
+            className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-default focus:ring-0 focus:border-gray-200"
           />
         </div>
+      </div>
+
+      <div className="mt-6 flex items-center gap-4">
+        <button
+          onClick={onReset}
+          className="flex-1 px-4 py-2 bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 hover:shadow-md rounded-lg transition-all duration-200 h-[42px] font-medium active:scale-95 flex items-center justify-center gap-2"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          Reset
+        </button>
         
-        {/* Reset Button */}
-        <div className="flex items-end gap-2 md:col-span-2 lg:col-span-2">
-           <button
-            onClick={onReset}
-            className="w-1/2 px-4 py-2 bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 hover:shadow-md rounded-lg transition-all duration-200 h-[42px] font-medium active:scale-95 flex items-center justify-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-            Reset
-          </button>
-          
-          <button
-            onClick={onApply}
-            className="w-1/2 px-4 py-2 bg-indigo-500 border border-transparent text-white hover:bg-indigo-600 hover:shadow-md rounded-lg transition-all duration-200 h-[42px] font-medium active:scale-95 flex items-center justify-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            Apply
-          </button>
-        </div>
+        <button
+          onClick={onApply}
+          className="flex-1 px-4 py-2 bg-indigo-500 border border-transparent text-white hover:bg-indigo-600 hover:shadow-md rounded-lg transition-all duration-200 h-[42px] font-medium active:scale-95 flex items-center justify-center gap-2"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          Apply
+        </button>
       </div>
     </div>
   );

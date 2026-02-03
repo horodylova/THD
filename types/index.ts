@@ -1,14 +1,15 @@
 export interface DataItem {
   id: number;
-  name: string;
+  name: string;  
   state: string;
-  cocNumber: string; // Replaced category with cocNumber
-  measure: string; // Added measure field
-  [year: string]: string | number; // Allow dynamic year properties
+  cocNumber: string;
+  cocCategory: string;  
+  measure: string;
+  [year: string]: string | number;
 }
 
 export interface FilterState {
-  measure: string; // Replaced search with measure
+  measure: string;
   state: string;
-  cocNumber: string; // Replaced category with cocNumber
+  cocNumber: string;
 }
