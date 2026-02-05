@@ -49,10 +49,10 @@ export default function DataTableContent({
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50/80 backdrop-blur-sm">
             <tr>
-              <th scope="col" className="px-6 py-4 text-left sticky left-0 z-20 bg-gray-50/95 backdrop-blur-sm w-[64px] min-w-[64px]">
+              <th scope="col" className="px-6 py-4 text-left sticky left-0 z-20 bg-gray-50 w-[64px] min-w-[64px]">
                 <input type="checkbox" className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 transition-colors cursor-pointer" />
               </th>
-              <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider min-w-[200px] sticky left-[64px] bg-gray-50/95 backdrop-blur-sm z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+              <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider min-w-[200px] sticky left-[64px] bg-gray-50 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                 Description
               </th>
               {years.map((year) => (
@@ -60,7 +60,7 @@ export default function DataTableContent({
                   {year}
                 </th>
               ))}
-              <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider sticky right-0 bg-gray-50/95 backdrop-blur-sm z-10 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+              <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider sticky right-0 bg-gray-50 z-10 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                 Actions
               </th>
             </tr>
@@ -68,11 +68,11 @@ export default function DataTableContent({
           <tbody className="bg-white divide-y divide-gray-100">
             {data.length > 0 ? (
               data.map((item) => (
-                <tr key={item.id} className="hover:bg-indigo-50/30 transition-colors duration-150 group">
-                  <td className="px-6 py-4 whitespace-nowrap sticky left-0 bg-white group-hover:bg-indigo-50/30 z-10 transition-colors duration-150">
+                <tr key={item.id} className="hover:bg-indigo-50 transition-colors duration-150 group">
+                  <td className="px-6 py-4 whitespace-nowrap sticky left-0 bg-white group-hover:bg-indigo-50 z-10 transition-colors duration-150">
                     <input type="checkbox" className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 transition-colors cursor-pointer" />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap sticky left-[64px] bg-white group-hover:bg-indigo-50/30 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] transition-colors duration-150">
+                  <td className="px-6 py-4 whitespace-nowrap sticky left-[64px] bg-white group-hover:bg-indigo-50 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] transition-colors duration-150">
                     <div className="text-sm font-medium text-gray-900 group-hover:text-indigo-700 transition-colors">
                       {item.cocNumber}, {item.measure}
                     </div>
@@ -82,7 +82,7 @@ export default function DataTableContent({
                       {item[year.toString()] || '-'}
                     </td>
                   ))}
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium sticky right-0 bg-white group-hover:bg-indigo-50/30 z-10 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.05)] transition-colors duration-150">
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium sticky right-0 bg-white group-hover:bg-indigo-50 z-10 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.05)] transition-colors duration-150">
                     {/* Empty Actions column for now */}
                   </td>
                 </tr>

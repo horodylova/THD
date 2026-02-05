@@ -18,17 +18,20 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
     cocNumber: '',
   });
  
-  const [appliedFilters, setAppliedFilters] = useState<FilterState>({
-    measure: '',
-    state: '',
-    cocNumber: '',
-  });
+  // Removed unused state
+  // const [appliedFilters, setAppliedFilters] = useState<FilterState>({
+  //   measure: '',
+  //   state: '',
+  //   cocNumber: '',
+  // });
 
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
  
   const [data] = useState<DataItem[]>(initialData);
+  const [displayedData, setDisplayedData] = useState<DataItem[]>(initialData);
+  const [isCustomView, setIsCustomView] = useState(false);
  
   const uniqueStates = React.useMemo(() => {
     const states = new Set(data.map(item => item.state));
@@ -52,24 +55,43 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
     return item ? { name: item.name, category: item.cocCategory } : { name: '', category: '' };
   }, [data, filters.cocNumber]);
 
-  const getFilteredData = () => {
-    return data.filter((item) => {
-      const matchesMeasure = !appliedFilters.measure || item.measure === appliedFilters.measure; // Fixed: check against item.measure
+  // Removed unused getFilteredData since we manage displayedData directly
+  // const getFilteredData = () => {
+  //   return data.filter((item) => {
+  //     const matchesMeasure = !appliedFilters.measure || item.measure === appliedFilters.measure;
+  //     const matchesState = !appliedFilters.state || item.state === appliedFilters.state;
+  //     const matchesCoC = !appliedFilters.cocNumber || item.cocNumber === appliedFilters.cocNumber;
+  //     return matchesMeasure && matchesState && matchesCoC;
+  //   });
+  // };
 
-      const matchesState = !appliedFilters.state || item.state === appliedFilters.state;
-      const matchesCoC = !appliedFilters.cocNumber || item.cocNumber === appliedFilters.cocNumber;
-
-      return matchesMeasure && matchesState && matchesCoC;
-    });
-  };
-
-  const filteredData = getFilteredData();
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  // const filteredData = getFilteredData();
+  const totalPages = Math.ceil(displayedData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedData = displayedData.slice(startIndex, startIndex + itemsPerPage);
 
   const handleApplyFilters = () => {
-    setAppliedFilters(filters);
+    const newItems = data.filter((item) => {
+      const matchesMeasure = !filters.measure || item.measure === filters.measure;
+      const matchesState = !filters.state || item.state === filters.state;
+      const matchesCoC = !filters.cocNumber || item.cocNumber === filters.cocNumber;
+      return matchesMeasure && matchesState && matchesCoC;
+    });
+
+    setDisplayedData((prev) => {
+      // If it's the first time applying filters (switching from "All Data" to "Custom View"),
+      // we discard the initial full dataset and start fresh with the new items.
+      if (!isCustomView) {
+        return newItems;
+      }
+      
+      // If we are already in "Custom View", we append new items to the existing ones.
+      const existingIds = new Set(prev.map(item => item.id));
+      const uniqueNewItems = newItems.filter(item => !existingIds.has(item.id));
+      return [...prev, ...uniqueNewItems];
+    });
+    
+    setIsCustomView(true);
     setCurrentPage(1);
   };
 
@@ -80,7 +102,8 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
       cocNumber: '',
     };
     setFilters(emptyFilters);
-    setAppliedFilters(emptyFilters);
+    setDisplayedData(initialData);
+    setIsCustomView(false);
     setCurrentPage(1);
   };
 
@@ -102,7 +125,7 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
           data={paginatedData}
           startIndex={startIndex}
           itemsPerPage={itemsPerPage}
-          totalItems={filteredData.length}
+          totalItems={displayedData.length}
         />
         <DataTablePagination
           currentPage={currentPage}
