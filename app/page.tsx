@@ -23,7 +23,7 @@ export default async function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-100">
+    <main className="h-screen bg-gray-100 overflow-hidden flex flex-col">
       <DataTable initialData={initialData} />
     </main>
   );

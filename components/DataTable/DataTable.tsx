@@ -6,6 +6,7 @@ import DataTableFilters from './DataTableFilters';
 import DataTableContent from './DataTableContent';
 import DataTablePagination from './DataTablePagination';
 import { DataItem, FilterState } from '@/types';
+import { generatePDF } from '@/lib/pdfExport';
 
 interface DataTableProps {
   initialData?: DataItem[];
@@ -18,12 +19,6 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
     cocNumber: '',
   });
  
-  // Removed unused state
-  // const [appliedFilters, setAppliedFilters] = useState<FilterState>({
-  //   measure: '',
-  //   state: '',
-  //   cocNumber: '',
-  // });
 
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,6 +27,47 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
   const [data] = useState<DataItem[]>(initialData);
   const [displayedData, setDisplayedData] = useState<DataItem[]>(initialData);
   const [isCustomView, setIsCustomView] = useState(false);
+  const [selectedRowIds, setSelectedRowIds] = useState<Set<number>>(new Set());
+
+  const toggleRowSelection = (id: number) => {
+    setSelectedRowIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const handleDeleteSelected = () => {
+    setDisplayedData(prev => prev.filter(item => !selectedRowIds.has(item.id)));
+    setSelectedRowIds(new Set());
+    
+  
+    const remainingItems = displayedData.filter(item => !selectedRowIds.has(item.id));
+    const maxPage = Math.ceil(remainingItems.length / itemsPerPage);
+    if (currentPage > maxPage && maxPage > 0) {
+      setCurrentPage(maxPage);
+    } else if (maxPage === 0) {
+      setCurrentPage(1);
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      // Select all visible items on the current page
+      const newSelected = new Set(selectedRowIds);
+      paginatedData.forEach(item => newSelected.add(item.id));
+      setSelectedRowIds(newSelected);
+    } else {
+      // Deselect all visible items on the current page
+      const newSelected = new Set(selectedRowIds);
+      paginatedData.forEach(item => newSelected.delete(item.id));
+      setSelectedRowIds(newSelected);
+    }
+  };
  
   const uniqueStates = React.useMemo(() => {
     const states = new Set(data.map(item => item.state));
@@ -55,17 +91,7 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
     return item ? { name: item.name, category: item.cocCategory } : { name: '', category: '' };
   }, [data, filters.cocNumber]);
 
-  // Removed unused getFilteredData since we manage displayedData directly
-  // const getFilteredData = () => {
-  //   return data.filter((item) => {
-  //     const matchesMeasure = !appliedFilters.measure || item.measure === appliedFilters.measure;
-  //     const matchesState = !appliedFilters.state || item.state === appliedFilters.state;
-  //     const matchesCoC = !appliedFilters.cocNumber || item.cocNumber === appliedFilters.cocNumber;
-  //     return matchesMeasure && matchesState && matchesCoC;
-  //   });
-  // };
-
-  // const filteredData = getFilteredData();
+  
   const totalPages = Math.ceil(displayedData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedData = displayedData.slice(startIndex, startIndex + itemsPerPage);
@@ -79,13 +105,11 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
     });
 
     setDisplayedData((prev) => {
-      // If it's the first time applying filters (switching from "All Data" to "Custom View"),
-      // we discard the initial full dataset and start fresh with the new items.
+  
       if (!isCustomView) {
         return newItems;
       }
-      
-      // If we are already in "Custom View", we append new items to the existing ones.
+   
       const existingIds = new Set(prev.map(item => item.id));
       const uniqueNewItems = newItems.filter(item => !existingIds.has(item.id));
       return [...prev, ...uniqueNewItems];
@@ -107,9 +131,13 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
     setCurrentPage(1);
   };
 
+  const handleExport = () => {
+    generatePDF(displayedData);
+  };
+
   return (
-    <div className="container mx-auto px-4 sm:px-8 max-w-7xl">
-      <div className="py-8">
+    <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 h-full flex flex-col gap-6">
+      <div className="flex-none">
         <DataTableHeader />
         <DataTableFilters
           filters={filters}
@@ -118,15 +146,26 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
           onApply={handleApplyFilters}
           availableStates={uniqueStates}
           availableCoCs={availableCoCs}
-          cocName={selectedCoC.name}
-          cocCategory={selectedCoC.category}
+          cocName={selectedCoC ? selectedCoC.name : ''}
+          cocCategory={selectedCoC ? selectedCoC.category : ''}
         />
+      </div>
+
+      <div className="flex-1 min-h-0">
         <DataTableContent
           data={paginatedData}
           startIndex={startIndex}
           itemsPerPage={itemsPerPage}
           totalItems={displayedData.length}
+          selectedRowIds={selectedRowIds}
+          onToggleRow={toggleRowSelection}
+          onSelectAll={handleSelectAll}
+          onDeleteSelected={handleDeleteSelected}
+          onExport={handleExport}
         />
+      </div>
+
+      <div className="flex-none">
         <DataTablePagination
           currentPage={currentPage}
           totalPages={totalPages}

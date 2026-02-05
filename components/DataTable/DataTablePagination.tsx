@@ -11,6 +11,51 @@ export default function DataTablePagination({
   totalPages,
   onPageChange,
 }: DataTablePaginationProps) {
+  const getPageNumbers = () => {
+    const pages = [];
+    const showMax = 5;
+
+    if (totalPages <= showMax) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always add first page
+      pages.push(1);
+
+      if (currentPage > 3) {
+        pages.push('...');
+      }
+
+      // Add pages around current page
+      let start = Math.max(2, currentPage - 1);
+      let end = Math.min(totalPages - 1, currentPage + 1);
+
+      // Adjust if close to beginning
+      if (currentPage <= 3) {
+        end = 4;
+      }
+
+      // Adjust if close to end
+      if (currentPage >= totalPages - 2) {
+        start = totalPages - 3;
+      }
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (currentPage < totalPages - 2) {
+        pages.push('...');
+      }
+
+     
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
+
   return (
     <div className="px-6 py-4 border-t border-gray-200 bg-gray-50/50">
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -27,8 +72,19 @@ export default function DataTablePagination({
             Previous
           </button>
           <div className="flex gap-1 px-2">
-            {[...Array(Math.min(5, totalPages))].map((_, i) => {
-              const pageNum = i + 1;
+            {getPageNumbers().map((page, index) => {
+              if (page === '...') {
+                return (
+                  <span
+                    key={`ellipsis-${index}`}
+                    className="w-9 h-9 flex items-center justify-center text-gray-400 font-medium"
+                  >
+                    ...
+                  </span>
+                );
+              }
+              
+              const pageNum = page as number;
               return (
                 <button
                   key={pageNum}
