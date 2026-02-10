@@ -1,6 +1,6 @@
 import { DataItem } from '@/types';
 
-export const generatePDF = async (data: DataItem[]) => {
+export const generatePDF = async (data: DataItem[], chartImage?: string) => {
   const jsPDF = (await import('jspdf')).default;
   const autoTable = (await import('jspdf-autotable')).default;
 
@@ -69,6 +69,33 @@ export const generatePDF = async (data: DataItem[]) => {
       doc.text('THD Data Export', data.settings.margin.left, 8);
     },
   });
+
+  // Add chart if provided
+  if (chartImage) {
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 10;
+    const maxWidth = pageWidth - (margin * 2);
+    
+    // Calculate Y position based on table end
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const finalY = (doc as any).lastAutoTable.finalY || 20;
+    let yPos = finalY + 10;
+    
+    // Check if there's enough space on the current page
+    // Assume chart height is roughly 100mm + title
+    if (yPos + 120 > pageHeight) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setTextColor(40);
+    // Removed "Data Trends" title as per user request
+    
+    // Add image (assuming chartImage is base64 string)
+    doc.addImage(chartImage, 'PNG', margin, yPos + 5, maxWidth, 100);
+  }
 
   // Save the PDF
   doc.save('thd-data_export.pdf');

@@ -66,7 +66,7 @@ export default function DataChart({ data = [] }: DataChartProps) {
       {/* Controls Header */}
       <div className="flex justify-between items-center mb-2 flex-none z-10">
         <h3 className="text-sm font-semibold text-gray-700">Trends</h3>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 chart-controls-no-export">
            <label className="flex items-center cursor-pointer relative">
             <input 
               type="checkbox"

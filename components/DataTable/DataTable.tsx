@@ -168,8 +168,41 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
     setCurrentPage(1);
   };
 
-  const handleExport = () => {
-    generatePDF(displayedData);
+  const chartRef = React.useRef<HTMLDivElement>(null);
+
+  const handleExport = async () => {
+    let chartImage: string | undefined;
+    
+    if (chartRef.current && chartData.length > 0) {
+      try {
+        const html2canvas = (await import('html2canvas')).default;
+        const canvas = await html2canvas(chartRef.current, {
+          scale: 2, // Improve quality
+          logging: false,
+          backgroundColor: '#ffffff',
+          onclone: (clonedDoc) => {
+            const controls = clonedDoc.querySelectorAll('.chart-controls-no-export');
+            controls.forEach((el) => {
+              (el as HTMLElement).style.display = 'none';
+            });
+            
+            // Hide tooltips and active dots
+            const style = clonedDoc.createElement('style');
+            style.innerHTML = `
+              .recharts-tooltip-wrapper { display: none !important; }
+              .recharts-active-dot { display: none !important; }
+              .recharts-tooltip-cursor { display: none !important; }
+            `;
+            clonedDoc.head.appendChild(style);
+          }
+        });
+        chartImage = canvas.toDataURL('image/png');
+      } catch (error) {
+        console.error('Failed to capture chart image:', error);
+      }
+    }
+    
+    generatePDF(displayedData, chartImage);
   };
 
   const chartData = React.useMemo(() => {
@@ -248,7 +281,10 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
             </div>
           </div>
           
-          <div className="flex-1 min-h-0 basis-1/2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+          <div 
+            ref={chartRef}
+            className="flex-1 min-h-0 basis-1/2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden"
+          >
             <DataChart data={chartData} />
           </div>
         </div>
