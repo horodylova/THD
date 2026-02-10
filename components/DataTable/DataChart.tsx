@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   LineChart,
-  // Line, // will be used later
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -9,73 +9,148 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
+import { DataItem } from '@/types';
 
 interface DataChartProps {
-  // We can add props here later when we connect real data
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data?: any[]; 
+  data: DataItem[];
 }
 
+// Helper to format large numbers (k, M)
+const formatNumber = (num: number) => {
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}k`;
+  return num.toString();
+};
+
 export default function DataChart({ data = [] }: DataChartProps) {
-  // Generate years from 2007 to 2024 for the X-axis domain if no data
-  // or just to ensure the axis range is correct.
-  // The user asked for "years" on horizontal axis.
-  
-  // Mock data structure for now (empty as requested, but we need structure for the axis)
-  // Or purely empty? "пока что пустой!"
-  // If I pass empty array to Recharts, it renders axes but no lines.
-  
+  const [isLogScale, setIsLogScale] = useState(false);
+
+  // 1. Transform data for Recharts:
+  // We need an array of objects where each object represents a year,
+  // and keys are data series (e.g., { year: 2007, "NY-Total": 50000, "LA-Total": 30000 })
+  const chartData = useMemo(() => {
+    const years = Array.from({ length: 2024 - 2007 + 1 }, (_, i) => 2007 + i);
+    
+    return years.map(year => {
+      const yearStr = year.toString();
+      const point: { [key: string]: number | null } = { year };
+      
+      data.forEach(item => {
+        // Use a unique key for each line, e.g., "id-123"
+        // We will map this key back to a label in the Line component
+        const val = item[yearStr];
+        // Ensure we parse number correctly, handling potential strings/nulls
+        const numVal = typeof val === 'string' ? parseInt(val.replace(/,/g, ''), 10) : val;
+        
+        point[`item-${item.id}`] = !isNaN(numVal) ? numVal : null;
+      });
+      
+      return point;
+    });
+  }, [data]);
+
+  // Colors for lines - rotating palette
+  const colors = [
+    '#4F46E5', // Indigo 600
+    '#EC4899', // Pink 500
+    '#10B981', // Emerald 500
+    '#F59E0B', // Amber 500
+    '#3B82F6', // Blue 500
+    '#8B5CF6', // Violet 500
+    '#EF4444', // Red 500
+    '#6366F1', // Indigo 500
+  ];
+
   return (
-    <div className="w-full h-full p-4">
-      <div className="w-full h-full">
+    <div className="w-full h-full p-4 relative flex flex-col">
+      {/* Controls Header */}
+      <div className="flex justify-between items-center mb-2 flex-none z-10">
+        <h3 className="text-sm font-semibold text-gray-700">Trends</h3>
+        <div className="flex items-center gap-2">
+           <label className="flex items-center cursor-pointer relative">
+            <input 
+              type="checkbox"
+              className="sr-only peer"
+              checked={isLogScale}
+              onChange={(e) => setIsLogScale(e.target.checked)}
+            />
+            <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+            <span className="ml-2 text-xs font-medium text-gray-600">Log Scale</span>
+          </label>
+        </div>
+      </div>
+
+      <div className="flex-1 min-h-0 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
-            data={data}
+            data={chartData}
             margin={{
               top: 5,
               right: 30,
-              left: 20,
+              left: 10,
               bottom: 5,
             }}
           >
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
             <XAxis 
               dataKey="year" 
-              type="category"
-              allowDuplicatedCategory={false}
-              tick={{ fill: '#6B7280', fontSize: 12 }}
+              tick={{ fill: '#9CA3AF', fontSize: 11 }}
               axisLine={{ stroke: '#E5E7EB' }}
               tickLine={false}
-              label={{ value: 'Year', position: 'insideBottom', offset: -5, fill: '#9CA3AF', fontSize: 12 }}
+              dy={10}
             />
             <YAxis 
-              tick={{ fill: '#6B7280', fontSize: 12 }}
-              axisLine={{ stroke: '#E5E7EB' }}
+              tick={{ fill: '#9CA3AF', fontSize: 11 }}
+              axisLine={false}
               tickLine={false}
-              label={{ 
-                value: 'Hundreds of People', 
-                angle: -90, 
-                position: 'insideLeft', 
-                fill: '#9CA3AF',
-                fontSize: 12,
-                style: { textAnchor: 'middle' }
-              }}
+              tickFormatter={formatNumber}
+              width={40}
+              scale={isLogScale ? 'log' : 'auto'}
+              domain={data.length > 0 ? ['auto', 'auto'] : [0, 100]}
+              allowDataOverflow
             />
             <Tooltip 
               contentStyle={{ 
                 backgroundColor: '#fff', 
                 borderRadius: '8px', 
                 border: '1px solid #E5E7EB',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                fontSize: '12px'
               }}
+              formatter={(value: number | undefined) => [
+                typeof value === 'number' ? new Intl.NumberFormat('en-US').format(value) : 'N/A',
+                'People'
+              ]}
+              labelStyle={{ color: '#6B7280', marginBottom: '0.25rem' }}
             />
-            <Legend wrapperStyle={{ paddingTop: '10px' }} />
-            {/* 
-              This is where we would define <Line /> components.
-              Leaving it empty for now as requested.
-            */}
+            <Legend 
+              wrapperStyle={{ paddingTop: '10px', fontSize: '12px' }} 
+              iconType="circle"
+            />
+            
+            {data.map((item, index) => (
+              <Line
+                key={item.id}
+                type="monotone"
+                dataKey={`item-${item.id}`}
+                name={`${item.cocNumber} - ${item.state}`} // Legend label
+                stroke={colors[index % colors.length]}
+                strokeWidth={2}
+                dot={{ r: 3, strokeWidth: 1 }}
+                activeDot={{ r: 5, strokeWidth: 0 }}
+                connectNulls
+                isAnimationActive={true}
+              />
+            ))}
           </LineChart>
         </ResponsiveContainer>
+        {data.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="bg-white/80 px-4 py-2 rounded-full border border-gray-200 shadow-sm text-sm text-gray-500">
+              Select rows in table to compare
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -124,11 +124,26 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
     setDisplayedData((prev) => {
   
       if (!isCustomView) {
+        // Auto-select if results are few (<= 10)
+        if (newItems.length > 0 && newItems.length <= 10) {
+          const newIds = new Set(newItems.map(item => item.id));
+          setSelectedRowIds(newIds);
+        } else {
+          setSelectedRowIds(new Set());
+        }
         return newItems;
       }
    
       const existingIds = new Set(prev.map(item => item.id));
       const uniqueNewItems = newItems.filter(item => !existingIds.has(item.id));
+      
+      // Auto-select newly added items if total is small
+      if (uniqueNewItems.length > 0 && (prev.length + uniqueNewItems.length) <= 10) {
+        const newIds = new Set(selectedRowIds);
+        uniqueNewItems.forEach(item => newIds.add(item.id));
+        setSelectedRowIds(newIds);
+      }
+      
       return [...prev, ...uniqueNewItems];
     });
     
@@ -156,6 +171,10 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
   const handleExport = () => {
     generatePDF(displayedData);
   };
+
+  const chartData = React.useMemo(() => {
+    return displayedData.filter(item => selectedRowIds.has(item.id));
+  }, [displayedData, selectedRowIds]);
 
   return (
     <div className="w-full h-full flex flex-col md:flex-row overflow-hidden bg-gray-50">
@@ -230,7 +249,7 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
           </div>
           
           <div className="flex-1 min-h-0 basis-1/2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-            <DataChart data={[]} />
+            <DataChart data={chartData} />
           </div>
         </div>
       </main>
