@@ -1,12 +1,14 @@
 import React from 'react';
 import { FilterState } from '@/types';
 import { MEASURES } from '@/constants/measures';
+import Select, { SelectOption } from '../ui/Select';
 
 interface DataTableFiltersProps {
   filters: FilterState;
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
   onReset: () => void;
   onApply: () => void;
+  onClose?: () => void;
   availableStates: string[];
   availableCoCs: string[];
   cocName: string;
@@ -18,91 +20,97 @@ export default function DataTableFilters({
   setFilters,
   onReset,
   onApply,
+  onClose,
   availableStates,
   availableCoCs,
   cocName,
   cocCategory,
 }: DataTableFiltersProps) {
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-     
-    if (name === 'state') {
-      setFilters((prev) => ({ 
-        ...prev, 
-        [name]: value,
-        cocNumber: ''  
-      }));
-    } else {
-      setFilters((prev) => ({ ...prev, [name]: value }));
-    }
+
+  const handleMeasureChange = (value: string) => {
+    setFilters((prev) => ({ ...prev, measure: value }));
   };
 
-  return (
-    <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100 transition-all duration-300 hover:shadow-xl">
-      <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-        <span className="w-1 h-6 bg-indigo-500 rounded-full"></span>
-        Filters
-      </h3>
+  const handleStateChange = (value: string) => {
+    setFilters((prev) => ({ 
+      ...prev, 
+      state: value,
+      cocNumber: '' 
+    }));
+  };
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+  const handleCocNumberChange = (value: string) => {
+    setFilters((prev) => ({ ...prev, cocNumber: value }));
+  };
+
+  const measureOptions: SelectOption[] = [
+    { value: '', label: 'Select Measure' },
+    ...MEASURES.map(measure => ({ value: measure, label: measure }))
+  ];
+
+  const stateOptions: SelectOption[] = [
+    { value: '', label: 'Select State' },
+    ...availableStates.map(state => ({ value: state, label: state }))
+  ];
+
+  const cocOptions: SelectOption[] = [
+    { value: '', label: !filters.state ? 'Select State first' : 'All CoC Numbers' },
+    ...availableCoCs.map(coc => ({ value: coc, label: coc }))
+  ];
+
+  return (
+    <div className="h-full flex flex-col">
+      <div className="hidden md:flex justify-between items-center mb-6">
+        <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+          <span className="w-1 h-6 bg-indigo-500 rounded-full"></span>
+          Filters
+        </h3>
+        {onClose && (
+          <button 
+            onClick={onClose}
+            className="p-1.5 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100 transition-colors active:scale-95"
+            title="Hide Sidebar"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-6 flex-1 overflow-y-auto pr-2 custom-scrollbar">
         {/* Measure Filter */}
         <div className="group">
-          <label className="block text-sm font-medium text-gray-700 mb-2 transition-colors group-hover:text-indigo-600">Measure</label>
-          <select
-            name="measure"
+          <Select
+            label="Measure"
             value={filters.measure}
-            onChange={handleInputChange}
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white transition-all duration-200 hover:border-indigo-300"
-          >
-            <option value="">Select Measure</option>
-            {MEASURES.map((measure) => (
-              <option key={measure} value={measure}>
-                {measure}
-              </option>
-            ))}
-          </select>
+            onChange={handleMeasureChange}
+            options={measureOptions}
+            placeholder="Select Measure"
+          />
         </div>
 
         {/* State Filter */}
         <div className="group">
-          <label className="block text-sm font-medium text-gray-700 mb-2 transition-colors group-hover:text-indigo-600">State</label>
-          <select
-            name="state"
+          <Select
+            label="State"
             value={filters.state}
-            onChange={handleInputChange}
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white transition-all duration-200 hover:border-indigo-300"
-          >
-            <option value="">Select State</option>
-            {availableStates.map((state) => (
-              <option key={state} value={state}>
-                {state}
-              </option>
-            ))}
-          </select>
+            onChange={handleStateChange}
+            options={stateOptions}
+            placeholder="Select State"
+          />
         </div>
 
         {/* CoC Number Filter */}
         <div className="group">
-          <label className="block text-sm font-medium text-gray-700 mb-2 transition-colors group-hover:text-indigo-600">CoC Number</label>
-          <select
-            name="cocNumber"
+          <Select
+            label="CoC Number"
             value={filters.cocNumber}
-            onChange={handleInputChange}
-            disabled={!filters.state} // Disabled if no state is selected
-            className={`w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white transition-all duration-200 hover:border-indigo-300 ${
-              !filters.state ? 'opacity-50 cursor-not-allowed bg-gray-50' : ''
-            }`}
-          >
-            <option value="">
-              {!filters.state ? 'Select State first' : 'All CoC Numbers'}
-            </option>
-            {availableCoCs.map((coc) => (
-              <option key={coc} value={coc}>
-                {coc}
-              </option>
-            ))}
-          </select>
+            onChange={handleCocNumberChange}
+            options={cocOptions}
+            disabled={!filters.state}
+            placeholder={!filters.state ? 'Select State first' : 'All CoC Numbers'}
+          />
         </div>
 
         {/* CoC Name (Read-only) */}

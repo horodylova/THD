@@ -11,6 +11,8 @@ interface DataTableContentProps {
   onSelectAll: (checked: boolean) => void;
   onDeleteSelected: () => void;
   onExport: () => void;
+  isSidebarOpen: boolean;
+  onToggleSidebar: () => void;
 }
 
 export default function DataTableContent({
@@ -23,20 +25,10 @@ export default function DataTableContent({
   onSelectAll,
   onDeleteSelected,
   onExport,
+  isSidebarOpen,
+  onToggleSidebar,
 }: DataTableContentProps) {
   const years = Array.from({ length: 2024 - 2007 + 1 }, (_, i) => 2007 + i);
-
-  const calculateTotal = (item: DataItem) => {
-    return years.reduce((sum, year) => {
-      const value = item[year.toString()];
-      if (!value) return sum;
-      const numValue = typeof value === 'string' 
-        ? parseInt(value.replace(/,/g, ''), 10) 
-        : typeof value === 'number' ? value : 0;
-      
-      return sum + (isNaN(numValue) ? 0 : numValue);
-    }, 0);
-  };
 
   const allSelected = data.length > 0 && data.every(item => selectedRowIds.has(item.id));
   const someSelected = data.some(item => selectedRowIds.has(item.id));
@@ -46,13 +38,26 @@ export default function DataTableContent({
       {/* Table Stats */}
       <div className="flex-none px-6 py-4 border-b border-gray-200 bg-gray-50/50">
         <div className="flex justify-between items-center">
-          <p className="text-sm text-gray-600">
-            Showing <span className="font-semibold text-gray-900">{Math.min(startIndex + 1, totalItems)}</span> to{' '}
-            <span className="font-semibold text-gray-900">
-              {Math.min(startIndex + itemsPerPage, totalItems)}
-            </span>{' '}
-            of <span className="font-semibold text-gray-900">{totalItems}</span> results
-          </p>
+          <div className="flex items-center gap-4">
+            {!isSidebarOpen && (
+              <button 
+                onClick={onToggleSidebar}
+                className="hidden md:block p-1.5 bg-white border border-gray-200 text-gray-600 rounded-lg shadow-sm hover:text-indigo-600 hover:border-indigo-300 transition-all duration-200"
+                title="Show Filters"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+              </button>
+            )}
+            <p className="text-sm text-gray-600">
+              Showing <span className="font-semibold text-gray-900">{Math.min(startIndex + 1, totalItems)}</span> to{' '}
+              <span className="font-semibold text-gray-900">
+                {Math.min(startIndex + itemsPerPage, totalItems)}
+              </span>{' '}
+              of <span className="font-semibold text-gray-900">{totalItems}</span> results
+            </p>
+          </div>
           <div className="flex gap-2">
             <button 
               onClick={onExport}
@@ -102,9 +107,6 @@ export default function DataTableContent({
                   {year}
                 </th>
               ))}
-              <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider sticky top-0 right-0 bg-gray-50 z-50 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]">
-                Total
-              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-100">
@@ -129,14 +131,11 @@ export default function DataTableContent({
                       {item[year.toString()] || '-'}
                     </td>
                   ))}
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-indigo-600 sticky right-0 bg-white group-hover:bg-indigo-50 z-10 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.05)] transition-colors duration-150">
-                    {calculateTotal(item).toLocaleString('en-US')}
-                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={years.length + 3} className="px-6 py-12 text-center text-gray-500 bg-gray-50/20">
+                <td colSpan={years.length + 2} className="px-6 py-12 text-center text-gray-500 bg-gray-50/20">
                   <div className="flex flex-col items-center justify-center">
                     <svg className="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>

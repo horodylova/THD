@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
-import DataTableHeader from './DataTableHeader';
+import React, { useState, useEffect } from 'react';
+// import DataTableHeader from './DataTableHeader'; // Removed as requested
 import DataTableFilters from './DataTableFilters';
 import DataTableContent from './DataTableContent';
 import DataTablePagination from './DataTablePagination';
+import DataChart from './DataChart';
 import { DataItem, FilterState } from '@/types';
 import { generatePDF } from '@/lib/pdfExport';
 
@@ -28,6 +29,22 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
   const [displayedData, setDisplayedData] = useState<DataItem[]>(initialData);
   const [isCustomView, setIsCustomView] = useState(false);
   const [selectedRowIds, setSelectedRowIds] = useState<Set<number>>(new Set());
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  // Handle responsive sidebar
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsSidebarOpen(false);
+      } else {
+        setIsSidebarOpen(true);
+      }
+    };
+
+    handleResize(); // Initial check
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const toggleRowSelection = (id: number) => {
     setSelectedRowIds(prev => {
@@ -117,6 +134,11 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
     
     setIsCustomView(true);
     setCurrentPage(1);
+    
+    // Auto-collapse sidebar on mobile after applying filters
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
   };
 
   const handleResetFilters = () => {
@@ -136,42 +158,82 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
   };
 
   return (
-    <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 h-full flex flex-col gap-6">
-      <div className="flex-none">
-        <DataTableHeader />
-        <DataTableFilters
-          filters={filters}
-          setFilters={setFilters}
-          onReset={handleResetFilters}
-          onApply={handleApplyFilters}
-          availableStates={uniqueStates}
-          availableCoCs={availableCoCs}
-          cocName={selectedCoC ? selectedCoC.name : ''}
-          cocCategory={selectedCoC ? selectedCoC.category : ''}
-        />
+    <div className="w-full h-full flex flex-col md:flex-row overflow-hidden bg-gray-50">
+      {/* Mobile Sidebar Toggle */}
+      <div 
+        className="md:hidden flex-none bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors z-20"
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+      >
+        <div className="flex items-center gap-2 font-bold text-gray-800">
+          <span className="w-1 h-6 bg-indigo-500 rounded-full"></span>
+          Filters
+        </div>
+        <svg 
+          className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${isSidebarOpen ? 'rotate-180' : ''}`} 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+        </svg>
       </div>
 
-      <div className="flex-1 min-h-0">
-        <DataTableContent
-          data={paginatedData}
-          startIndex={startIndex}
-          itemsPerPage={itemsPerPage}
-          totalItems={displayedData.length}
-          selectedRowIds={selectedRowIds}
-          onToggleRow={toggleRowSelection}
-          onSelectAll={handleSelectAll}
-          onDeleteSelected={handleDeleteSelected}
-          onExport={handleExport}
-        />
-      </div>
+      {/* Sidebar - Filters */}
+      <aside className={`
+        flex-none bg-white border-r border-gray-200 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10 overflow-hidden transition-all duration-300 ease-in-out
+        md:h-full md:flex md:flex-col
+        ${isSidebarOpen ? 'md:w-80 md:opacity-100' : 'md:w-0 md:opacity-0 md:border-r-0'}
+        ${isSidebarOpen ? 'max-h-[80vh] opacity-100 border-b' : 'max-h-0 opacity-0 border-b-0'}
+        md:border-b-0 w-full md:max-h-full
+      `}>
+        <div className="px-6 pb-6 pt-6 md:pt-11 h-full overflow-hidden w-full md:w-80 overflow-y-auto">
+          <DataTableFilters
+            filters={filters}
+            setFilters={setFilters}
+            onReset={handleResetFilters}
+            onApply={handleApplyFilters}
+            onClose={() => setIsSidebarOpen(false)}
+            availableStates={uniqueStates}
+            availableCoCs={availableCoCs}
+            cocName={selectedCoC ? selectedCoC.name : ''}
+            cocCategory={selectedCoC ? selectedCoC.category : ''}
+          />
+        </div>
+      </aside>
 
-      <div className="flex-none">
-        <DataTablePagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
-      </div>
+      {/* Main Content - Header, Table, Pagination */}
+      <main className="flex-1 flex flex-col h-full min-w-0 overflow-hidden relative p-4 md:p-8">
+        <div className="flex-1 min-h-0 flex flex-col gap-6">
+          <div className="flex-1 min-h-0 flex flex-col gap-4 basis-1/2">
+            <div className="flex-1 min-h-0">
+              <DataTableContent
+                data={paginatedData}
+                startIndex={startIndex}
+                itemsPerPage={itemsPerPage}
+                totalItems={displayedData.length}
+                selectedRowIds={selectedRowIds}
+                onToggleRow={toggleRowSelection}
+                onSelectAll={handleSelectAll}
+                onDeleteSelected={handleDeleteSelected}
+                onExport={handleExport}
+                isSidebarOpen={isSidebarOpen}
+                onToggleSidebar={() => setIsSidebarOpen(true)}
+              />
+            </div>
+            <div className="flex-none">
+              <DataTablePagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          </div>
+          
+          <div className="flex-1 min-h-0 basis-1/2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            <DataChart data={[]} />
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
