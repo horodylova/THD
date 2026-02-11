@@ -15,9 +15,9 @@ interface DataTableProps {
 
 export default function DataTable({ initialData = [] }: DataTableProps) {
   const [filters, setFilters] = useState<FilterState>({
-    measure: '',
-    state: '',
-    cocNumber: '',
+    measure: [],
+    state: [],
+    cocNumber: [],
   });
  
 
@@ -27,9 +27,9 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
  
   const [data] = useState<DataItem[]>(initialData);
   const [displayedData, setDisplayedData] = useState<DataItem[]>(initialData);
-  const [isCustomView, setIsCustomView] = useState(false);
   const [selectedRowIds, setSelectedRowIds] = useState<Set<number>>(new Set());
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isComparisonView, setIsComparisonView] = useState(false);
 
   // Handle responsive sidebar
   useEffect(() => {
@@ -92,62 +92,92 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
   }, [data]);
 
   const availableCoCs = React.useMemo(() => {
-    if (!filters.state) return [];
+    if (filters.state.length === 0) return [];
     const cocs = new Set(
       data
-        .filter(item => item.state === filters.state)
+        .filter(item => filters.state.includes(item.state))
         .map(item => item.cocNumber)
     );
     return Array.from(cocs).filter(Boolean).sort();
   }, [data, filters.state]);
 
   
-  const selectedCoC = React.useMemo(() => {
-    if (!filters.cocNumber) return { name: '', category: '' };
-    const item = data.find(d => d.cocNumber === filters.cocNumber);
-    return item ? { name: item.name, category: item.cocCategory } : { name: '', category: '' };
-  }, [data, filters.cocNumber]);
-
-  
   const totalPages = Math.ceil(displayedData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedData = displayedData.slice(startIndex, startIndex + itemsPerPage);
 
+  const aggregateData = (items: DataItem[]): DataItem => {
+    const years = Array.from({ length: 2024 - 2007 + 1 }, (_, i) => 2007 + i);
+    const aggregated: DataItem = {
+      id: Date.now(),
+      name: 'Aggregated Data',
+      state: Array.from(new Set(items.map(i => i.state))).sort().join(', '),
+      cocNumber: Array.from(new Set(items.map(i => i.cocNumber))).sort().join(', '),
+      cocCategory: Array.from(new Set(items.map(i => i.cocCategory))).sort().join(', '),
+      measure: Array.from(new Set(items.map(i => i.measure))).sort().join(', '),
+    };
+
+    years.forEach(year => {
+      const sum = items.reduce((acc, item) => {
+        const val = item[year.toString()];
+        const num = typeof val === 'string' ? parseFloat(val.replace(/,/g, '')) : (val || 0);
+        return acc + (isNaN(num) ? 0 : num);
+      }, 0);
+      aggregated[year.toString()] = sum;
+    });
+
+    return aggregated;
+  };
+
   const handleApplyFilters = () => {
     const newItems = data.filter((item) => {
-      const matchesMeasure = !filters.measure || item.measure === filters.measure;
-      const matchesState = !filters.state || item.state === filters.state;
-      const matchesCoC = !filters.cocNumber || item.cocNumber === filters.cocNumber;
+      const matchesMeasure = filters.measure.length === 0 || filters.measure.includes(item.measure);
+      const matchesState = filters.state.length === 0 || filters.state.includes(item.state);
+      const matchesCoC = filters.cocNumber.length === 0 || filters.cocNumber.includes(item.cocNumber);
       return matchesMeasure && matchesState && matchesCoC;
     });
 
-    setDisplayedData((prev) => {
-  
-      if (!isCustomView) {
-        // Auto-select if results are few (<= 10)
-        if (newItems.length > 0 && newItems.length <= 10) {
-          const newIds = new Set(newItems.map(item => item.id));
-          setSelectedRowIds(newIds);
-        } else {
-          setSelectedRowIds(new Set());
-        }
-        return newItems;
-      }
-   
-      const existingIds = new Set(prev.map(item => item.id));
-      const uniqueNewItems = newItems.filter(item => !existingIds.has(item.id));
+    if (newItems.length > 0) {
+      // Aggregate the filtered items
+      const aggregatedItem = aggregateData(newItems);
       
-      // Auto-select newly added items if total is small
-      if (uniqueNewItems.length > 0 && (prev.length + uniqueNewItems.length) <= 10) {
-        const newIds = new Set(selectedRowIds);
-        uniqueNewItems.forEach(item => newIds.add(item.id));
-        setSelectedRowIds(newIds);
+      if (!isComparisonView) {
+        setDisplayedData([aggregatedItem]);
+        setIsComparisonView(true);
+        setSelectedRowIds(new Set([aggregatedItem.id]));
+      } else {
+        // Check for duplicates based on content
+        setDisplayedData(prev => {
+          const isDuplicate = prev.some(item => 
+            item.state === aggregatedItem.state &&
+            item.cocNumber === aggregatedItem.cocNumber &&
+            item.measure === aggregatedItem.measure
+          );
+          
+          if (isDuplicate) {
+            return prev;
+          }
+          
+          const newData = [...prev, aggregatedItem];
+          // Auto-select the new item
+          setSelectedRowIds(prevIds => {
+            const newIds = new Set(prevIds);
+            newIds.add(aggregatedItem.id);
+            return newIds;
+          });
+          return newData;
+        });
       }
-      
-      return [...prev, ...uniqueNewItems];
-    });
+    } else {
+      if (!isComparisonView) {
+        setDisplayedData([]);
+        setSelectedRowIds(new Set());
+        setIsComparisonView(true);
+      }
+      // If in comparison view and no results found for current filter, do nothing or maybe show a toast?
+      // For now, let's just not add anything if result is empty.
+    }
     
-    setIsCustomView(true);
     setCurrentPage(1);
     
     // Auto-collapse sidebar on mobile after applying filters
@@ -157,14 +187,15 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
   };
 
   const handleResetFilters = () => {
-    const emptyFilters = {
-      measure: '',
-      state: '',
-      cocNumber: '',
+    const emptyFilters: FilterState = {
+      measure: [],
+      state: [],
+      cocNumber: [],
     };
     setFilters(emptyFilters);
     setDisplayedData(initialData);
-    setIsCustomView(false);
+    setIsComparisonView(false);
+    setSelectedRowIds(new Set());
     setCurrentPage(1);
   };
 
@@ -202,7 +233,8 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
       }
     }
     
-    generatePDF(displayedData, chartImage);
+    const dataToExport = displayedData.filter(item => selectedRowIds.has(item.id));
+    generatePDF(dataToExport.length > 0 ? dataToExport : displayedData, chartImage);
   };
 
   const chartData = React.useMemo(() => {
@@ -247,8 +279,6 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
             onClose={() => setIsSidebarOpen(false)}
             availableStates={uniqueStates}
             availableCoCs={availableCoCs}
-            cocName={selectedCoC ? selectedCoC.name : ''}
-            cocCategory={selectedCoC ? selectedCoC.category : ''}
           />
         </div>
       </aside>

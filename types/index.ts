@@ -9,7 +9,7 @@ export interface DataItem {
 }
 
 export interface FilterState {
-  measure: string;
-  state: string;
-  cocNumber: string;
+  measure: string[];
+  state: string[];
+  cocNumber: string[];
 }

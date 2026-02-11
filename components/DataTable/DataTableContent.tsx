@@ -121,9 +121,9 @@ export default function DataTableContent({
                       className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 transition-colors cursor-pointer" 
                     />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap sticky left-[64px] bg-white group-hover:bg-indigo-50 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] transition-colors duration-150">
-                    <div className="text-sm font-medium text-gray-900 group-hover:text-indigo-700 transition-colors">
-                      {item.cocNumber}, {item.measure}
+                  <td className="px-6 py-4 sticky left-[64px] bg-white group-hover:bg-indigo-50 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] transition-colors duration-150">
+                    <div className="text-sm font-medium text-gray-900 group-hover:text-indigo-700 transition-colors whitespace-normal max-w-[300px]">
+                      {item.cocNumber}, {item.state}, {item.measure}
                     </div>
                   </td>
                   {years.map((year) => (

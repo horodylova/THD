@@ -1,7 +1,8 @@
 import React from 'react';
 import { FilterState } from '@/types';
 import { MEASURES } from '@/constants/measures';
-import Select, { SelectOption } from '../ui/Select';
+import MultiSelect, { MultiSelectOption } from '../ui/MultiSelect';
+import FilterTags from './FilterTags';
 
 interface DataTableFiltersProps {
   filters: FilterState;
@@ -11,8 +12,6 @@ interface DataTableFiltersProps {
   onClose?: () => void;
   availableStates: string[];
   availableCoCs: string[];
-  cocName: string;
-  cocCategory: string;
 }
 
 export default function DataTableFilters({
@@ -23,40 +22,29 @@ export default function DataTableFilters({
   onClose,
   availableStates,
   availableCoCs,
-  cocName,
-  cocCategory,
 }: DataTableFiltersProps) {
 
-  const handleMeasureChange = (value: string) => {
+  const handleMeasureChange = (value: string[]) => {
     setFilters((prev) => ({ ...prev, measure: value }));
   };
 
-  const handleStateChange = (value: string) => {
+  const handleStateChange = (value: string[]) => {
     setFilters((prev) => ({ 
       ...prev, 
       state: value,
-      cocNumber: '' 
+      cocNumber: [] // Reset CoC when state changes
     }));
   };
 
-  const handleCocNumberChange = (value: string) => {
+  const handleCocNumberChange = (value: string[]) => {
     setFilters((prev) => ({ ...prev, cocNumber: value }));
   };
 
-  const measureOptions: SelectOption[] = [
-    { value: '', label: 'Select Measure' },
-    ...MEASURES.map(measure => ({ value: measure, label: measure }))
-  ];
+  const measureOptions: MultiSelectOption[] = MEASURES.map(measure => ({ value: measure, label: measure }));
 
-  const stateOptions: SelectOption[] = [
-    { value: '', label: 'Select State' },
-    ...availableStates.map(state => ({ value: state, label: state }))
-  ];
+  const stateOptions: MultiSelectOption[] = availableStates.map(state => ({ value: state, label: state }));
 
-  const cocOptions: SelectOption[] = [
-    { value: '', label: !filters.state ? 'Select State first' : 'All CoC Numbers' },
-    ...availableCoCs.map(coc => ({ value: coc, label: coc }))
-  ];
+  const cocOptions: MultiSelectOption[] = availableCoCs.map(coc => ({ value: coc, label: coc }));
 
   return (
     <div className="h-full flex flex-col">
@@ -81,60 +69,66 @@ export default function DataTableFilters({
       <div className="flex flex-col gap-6 flex-1 overflow-y-auto pr-2 custom-scrollbar">
         {/* Measure Filter */}
         <div className="group">
-          <Select
+          <MultiSelect
             label="Measure"
             value={filters.measure}
             onChange={handleMeasureChange}
             options={measureOptions}
             placeholder="Select Measure"
           />
+          {filters.measure.length > 0 && (
+            <div className="mt-2">
+              <FilterTags
+                label="Selected Measures"
+                items={filters.measure}
+                onRemove={(item) => setFilters(prev => ({ ...prev, measure: prev.measure.filter(i => i !== item) }))}
+                onClearAll={() => setFilters(prev => ({ ...prev, measure: [] }))}
+              />
+            </div>
+          )}
         </div>
 
         {/* State Filter */}
         <div className="group">
-          <Select
+          <MultiSelect
             label="State"
             value={filters.state}
             onChange={handleStateChange}
             options={stateOptions}
             placeholder="Select State"
           />
+          {filters.state.length > 0 && (
+            <div className="mt-2">
+              <FilterTags
+                label="Selected States"
+                items={filters.state}
+                onRemove={(item) => setFilters(prev => ({ ...prev, state: prev.state.filter(i => i !== item), cocNumber: [] }))}
+                onClearAll={() => setFilters(prev => ({ ...prev, state: [], cocNumber: [] }))}
+              />
+            </div>
+          )}
         </div>
 
         {/* CoC Number Filter */}
         <div className="group">
-          <Select
+          <MultiSelect
             label="CoC Number"
             value={filters.cocNumber}
             onChange={handleCocNumberChange}
             options={cocOptions}
-            disabled={!filters.state}
-            placeholder={!filters.state ? 'Select State first' : 'All CoC Numbers'}
+            disabled={filters.state.length === 0}
+            placeholder={filters.state.length === 0 ? 'Select State first' : 'Select CoC Numbers'}
           />
-        </div>
-
-        {/* CoC Name (Read-only) */}
-        <div className="group">
-          <label className="block text-sm font-medium text-gray-700 mb-2 transition-colors group-hover:text-indigo-600">CoC Name</label>
-          <input
-            type="text"
-            value={cocName}
-            readOnly
-            placeholder="Auto-filled"
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-default focus:ring-0 focus:border-gray-200"
-          />
-        </div>
-
-        {/* CoC Category (Read-only) */}
-        <div className="group">
-          <label className="block text-sm font-medium text-gray-700 mb-2 transition-colors group-hover:text-indigo-600">CoC Category</label>
-          <input
-            type="text"
-            value={cocCategory}
-            readOnly
-            placeholder="Auto-filled"
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-default focus:ring-0 focus:border-gray-200"
-          />
+          {filters.cocNumber.length > 0 && (
+            <div className="mt-2">
+              <FilterTags
+                label="Selected CoCs"
+                items={filters.cocNumber}
+                onRemove={(item) => setFilters(prev => ({ ...prev, cocNumber: prev.cocNumber.filter(i => i !== item) }))}
+                onClearAll={() => setFilters(prev => ({ ...prev, cocNumber: [] }))}
+              />
+            </div>
+          )}
         </div>
       </div>
 
