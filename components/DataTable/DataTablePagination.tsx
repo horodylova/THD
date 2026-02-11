@@ -20,23 +20,20 @@ export default function DataTablePagination({
         pages.push(i);
       }
     } else {
-      // Always add first page
+      
       pages.push(1);
 
       if (currentPage > 3) {
         pages.push('...');
       }
 
-      // Add pages around current page
       let start = Math.max(2, currentPage - 1);
       let end = Math.min(totalPages - 1, currentPage + 1);
 
-      // Adjust if close to beginning
       if (currentPage <= 3) {
         end = 4;
       }
 
-      // Adjust if close to end
       if (currentPage >= totalPages - 2) {
         start = totalPages - 3;
       }

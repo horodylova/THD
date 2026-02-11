@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-// import DataTableHeader from './DataTableHeader'; // Removed as requested
 import DataTableFilters from './DataTableFilters';
 import DataTableContent from './DataTableContent';
 import DataTablePagination from './DataTablePagination';
@@ -31,7 +30,7 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isComparisonView, setIsComparisonView] = useState(false);
 
-  // Handle responsive sidebar
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
@@ -41,7 +40,7 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
       }
     };
 
-    handleResize(); // Initial check
+    handleResize(); 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -74,12 +73,12 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      // Select all visible items on the current page
+    
       const newSelected = new Set(selectedRowIds);
       paginatedData.forEach(item => newSelected.add(item.id));
       setSelectedRowIds(newSelected);
     } else {
-      // Deselect all visible items on the current page
+     
       const newSelected = new Set(selectedRowIds);
       paginatedData.forEach(item => newSelected.delete(item.id));
       setSelectedRowIds(newSelected);
@@ -138,7 +137,7 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
     });
 
     if (newItems.length > 0) {
-      // Aggregate the filtered items
+     
       const aggregatedItem = aggregateData(newItems);
       
       if (!isComparisonView) {
@@ -146,7 +145,7 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
         setIsComparisonView(true);
         setSelectedRowIds(new Set([aggregatedItem.id]));
       } else {
-        // Check for duplicates based on content
+        
         setDisplayedData(prev => {
           const isDuplicate = prev.some(item => 
             item.state === aggregatedItem.state &&
@@ -159,7 +158,7 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
           }
           
           const newData = [...prev, aggregatedItem];
-          // Auto-select the new item
+          
           setSelectedRowIds(prevIds => {
             const newIds = new Set(prevIds);
             newIds.add(aggregatedItem.id);
@@ -174,13 +173,12 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
         setSelectedRowIds(new Set());
         setIsComparisonView(true);
       }
-      // If in comparison view and no results found for current filter, do nothing or maybe show a toast?
-      // For now, let's just not add anything if result is empty.
+      
     }
     
     setCurrentPage(1);
     
-    // Auto-collapse sidebar on mobile after applying filters
+   
     if (window.innerWidth < 768) {
       setIsSidebarOpen(false);
     }
@@ -208,7 +206,7 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
       try {
         const html2canvas = (await import('html2canvas')).default;
         const canvas = await html2canvas(chartRef.current, {
-          scale: 2, // Improve quality
+          scale: 2, 
           logging: false,
           backgroundColor: '#ffffff',
           onclone: (clonedDoc) => {
@@ -217,7 +215,7 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
               (el as HTMLElement).style.display = 'none';
             });
             
-            // Hide tooltips and active dots
+           
             const style = clonedDoc.createElement('style');
             style.innerHTML = `
               .recharts-tooltip-wrapper { display: none !important; }

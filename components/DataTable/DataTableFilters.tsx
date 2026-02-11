@@ -32,7 +32,7 @@ export default function DataTableFilters({
     setFilters((prev) => ({ 
       ...prev, 
       state: value,
-      cocNumber: [] // Reset CoC when state changes
+      cocNumber: [] 
     }));
   };
 

@@ -1,36 +1,30 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# THD Data Analysis Dashboard
 
-## Getting Started
+THD Data Analysis Dashboard is a specialized analytical tool designed to visualize, aggregate, and compare Continuum of Care (CoC) data across different states and measures. It provides intuitive filtering, dynamic data aggregation, and professional reporting capabilities for efficient data analysis.
 
-First, run the development server:
+## Key Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Advanced Filtering**  
+  Utilize multi-select capabilities for States, CoC Numbers, and Measures to precisely target specific data segments.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Dynamic Aggregation**  
+  Automatically aggregates and sums data by year based on your selection, providing instant high-level insights.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Comparison View**  
+  Unique "stacking" functionality allows you to add new filter results to your existing view, enabling side-by-side comparison of different datasets without losing context.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Interactive Visualization**  
+  Real-time charts that dynamically update to reflect your current data selection.
 
-## Learn More
+- **Custom PDF Reporting**  
+  Generate clean, professional PDF reports that include only the specifically selected rows and corresponding visualizations, ensuring your reports are focused and relevant.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ⚠️ Proprietary Software Notice
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**This repository is presented for demonstration and portfolio purposes only.**
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **No Installation:** This software is not intended for public installation or self-hosting.
+- **No License:** No license is granted for the use, copying, modification, or distribution of this software.
+- **Strictly Prohibited:** Unauthorized copying, reproduction, or commercial use of the source code or any part of this project is strictly prohibited.

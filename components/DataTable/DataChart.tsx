@@ -15,7 +15,6 @@ interface DataChartProps {
   data: DataItem[];
 }
 
-// Helper to format large numbers (k, M)
 const formatNumber = (num: number) => {
   if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
   if (num >= 1000) return `${(num / 1000).toFixed(1)}k`;
@@ -25,9 +24,7 @@ const formatNumber = (num: number) => {
 export default function DataChart({ data = [] }: DataChartProps) {
   const [isLogScale, setIsLogScale] = useState(false);
 
-  // 1. Transform data for Recharts:
-  // We need an array of objects where each object represents a year,
-  // and keys are data series (e.g., { year: 2007, "NY-Total": 50000, "LA-Total": 30000 })
+
   const chartData = useMemo(() => {
     const years = Array.from({ length: 2024 - 2007 + 1 }, (_, i) => 2007 + i);
     
@@ -36,10 +33,9 @@ export default function DataChart({ data = [] }: DataChartProps) {
       const point: { [key: string]: number | null } = { year };
       
       data.forEach(item => {
-        // Use a unique key for each line, e.g., "id-123"
-        // We will map this key back to a label in the Line component
+       
         const val = item[yearStr];
-        // Ensure we parse number correctly, handling potential strings/nulls
+    
         const numVal = typeof val === 'string' ? parseInt(val.replace(/,/g, ''), 10) : val;
         
         point[`item-${item.id}`] = !isNaN(numVal) ? numVal : null;
@@ -49,16 +45,15 @@ export default function DataChart({ data = [] }: DataChartProps) {
     });
   }, [data]);
 
-  // Colors for lines - rotating palette
   const colors = [
-    '#4F46E5', // Indigo 600
-    '#EC4899', // Pink 500
-    '#10B981', // Emerald 500
-    '#F59E0B', // Amber 500
-    '#3B82F6', // Blue 500
-    '#8B5CF6', // Violet 500
-    '#EF4444', // Red 500
-    '#6366F1', // Indigo 500
+    '#4F46E5', 
+    '#EC4899', 
+    '#10B981', 
+    '#F59E0B', 
+    '#3B82F6', 
+    '#8B5CF6', 
+    '#EF4444', 
+    '#6366F1', 
   ];
 
   return (
