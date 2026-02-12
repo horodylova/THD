@@ -135,8 +135,8 @@ export default function DataTableContent({
               ))
             ) : (
               <tr>
-                <td colSpan={years.length + 2} className="px-6 py-12 text-center text-gray-500 bg-gray-50/20">
-                  <div className="flex flex-col items-center justify-center">
+                <td colSpan={years.length + 2} className="px-6 py-12 text-left text-gray-500 bg-gray-50/20">
+                  <div className="flex flex-col items-start justify-center">
                     <svg className="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>

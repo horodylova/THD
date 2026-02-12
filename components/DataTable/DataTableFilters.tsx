@@ -10,7 +10,6 @@ interface DataTableFiltersProps {
   onReset: () => void;
   onApply: () => void;
   onClose?: () => void;
-  availableStates: string[];
   availableCoCs: string[];
 }
 
@@ -20,7 +19,6 @@ export default function DataTableFilters({
   onReset,
   onApply,
   onClose,
-  availableStates,
   availableCoCs,
 }: DataTableFiltersProps) {
 
@@ -28,21 +26,11 @@ export default function DataTableFilters({
     setFilters((prev) => ({ ...prev, measure: value }));
   };
 
-  const handleStateChange = (value: string[]) => {
-    setFilters((prev) => ({ 
-      ...prev, 
-      state: value,
-      cocNumber: [] 
-    }));
-  };
-
   const handleCocNumberChange = (value: string[]) => {
     setFilters((prev) => ({ ...prev, cocNumber: value }));
   };
 
   const measureOptions: MultiSelectOption[] = MEASURES.map(measure => ({ value: measure, label: measure }));
-
-  const stateOptions: MultiSelectOption[] = availableStates.map(state => ({ value: state, label: state }));
 
   const cocOptions: MultiSelectOption[] = availableCoCs.map(coc => ({ value: coc, label: coc }));
 
@@ -88,27 +76,6 @@ export default function DataTableFilters({
           )}
         </div>
 
-        {/* State Filter */}
-        <div className="group">
-          <MultiSelect
-            label="State"
-            value={filters.state}
-            onChange={handleStateChange}
-            options={stateOptions}
-            placeholder="Select State"
-          />
-          {filters.state.length > 0 && (
-            <div className="mt-2">
-              <FilterTags
-                label="Selected States"
-                items={filters.state}
-                onRemove={(item) => setFilters(prev => ({ ...prev, state: prev.state.filter(i => i !== item), cocNumber: [] }))}
-                onClearAll={() => setFilters(prev => ({ ...prev, state: [], cocNumber: [] }))}
-              />
-            </div>
-          )}
-        </div>
-
         {/* CoC Number Filter */}
         <div className="group">
           <MultiSelect
@@ -116,8 +83,7 @@ export default function DataTableFilters({
             value={filters.cocNumber}
             onChange={handleCocNumberChange}
             options={cocOptions}
-            disabled={filters.state.length === 0}
-            placeholder={filters.state.length === 0 ? 'Select State first' : 'Select CoC Numbers'}
+            placeholder="Select CoC Numbers"
           />
           {filters.cocNumber.length > 0 && (
             <div className="mt-2">

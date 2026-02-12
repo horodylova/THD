@@ -20,12 +20,12 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
   });
  
 
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
   const [currentPage, setCurrentPage] = useState(1);
 
  
   const [data] = useState<DataItem[]>(initialData);
-  const [displayedData, setDisplayedData] = useState<DataItem[]>(initialData);
+  const [displayedData, setDisplayedData] = useState<DataItem[]>([]);
   const [selectedRowIds, setSelectedRowIds] = useState<Set<number>>(new Set());
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isComparisonView, setIsComparisonView] = useState(false);
@@ -84,21 +84,11 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
       setSelectedRowIds(newSelected);
     }
   };
- 
-  const uniqueStates = React.useMemo(() => {
-    const states = new Set(data.map(item => item.state));
-    return Array.from(states).filter(Boolean).sort();
-  }, [data]);
 
   const availableCoCs = React.useMemo(() => {
-    if (filters.state.length === 0) return [];
-    const cocs = new Set(
-      data
-        .filter(item => filters.state.includes(item.state))
-        .map(item => item.cocNumber)
-    );
+    const cocs = new Set(data.map(item => item.cocNumber));
     return Array.from(cocs).filter(Boolean).sort();
-  }, [data, filters.state]);
+  }, [data]);
 
   
   const totalPages = Math.ceil(displayedData.length / itemsPerPage);
@@ -191,7 +181,7 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
       cocNumber: [],
     };
     setFilters(emptyFilters);
-    setDisplayedData(initialData);
+    setDisplayedData([]);
     setIsComparisonView(false);
     setSelectedRowIds(new Set());
     setCurrentPage(1);
@@ -275,7 +265,6 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
             onReset={handleResetFilters}
             onApply={handleApplyFilters}
             onClose={() => setIsSidebarOpen(false)}
-            availableStates={uniqueStates}
             availableCoCs={availableCoCs}
           />
         </div>

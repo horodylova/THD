@@ -10,7 +10,6 @@ export const generatePDF = async (data: DataItem[], chartImage?: string) => {
 
   
   const columns = [
-    { header: 'State', dataKey: 'state' },
     { header: 'CoC Number', dataKey: 'cocNumber' },
     { header: 'Description', dataKey: 'description' },
     ...years.map(year => ({ header: year, dataKey: year })),
@@ -20,7 +19,6 @@ export const generatePDF = async (data: DataItem[], chartImage?: string) => {
   const rows = data.map(item => {
    
     const row: Record<string, string | number> = {
-      state: item.state,
       cocNumber: item.cocNumber,
       description: `${item.cocNumber} - ${item.measure}`,
     };
@@ -46,9 +44,8 @@ export const generatePDF = async (data: DataItem[], chartImage?: string) => {
       fontStyle: 'bold',
     },
     columnStyles: {
-      0: { cellWidth: 10 }, 
-      1: { cellWidth: 15 }, 
-      2: { cellWidth: 40 }, 
+      0: { cellWidth: 15 }, 
+      1: { cellWidth: 40 }, 
     
     },
     margin: { top: 10, left: 5, right: 5 },

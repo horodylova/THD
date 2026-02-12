@@ -24,7 +24,9 @@ export default async function Home() {
 
   return (
     <main className="h-screen bg-gray-100 overflow-hidden flex flex-col">
-      <DataTable initialData={initialData} />
+      <div className="w-full h-full lg:max-w-[1200px] lg:mx-auto lg:shadow-2xl lg:my-8 lg:rounded-xl lg:overflow-hidden lg:h-[calc(100vh-4rem)]">
+        <DataTable initialData={initialData} />
+      </div>
     </main>
   );
 }
