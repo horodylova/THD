@@ -21,6 +21,10 @@ THD Data Analysis Dashboard is a specialized analytical tool designed to visuali
 
 ---
 
+## Recent Enhancements
+
+I updated the application to initialize with a blank grid instead of loading default data. I removed the 'State' filter, exposing the full list of CoCs for direct selection, and adjusted the logic to support this workflow. I also optimized the PDF export by removing the 'State' column, improved the desktop layout by wrapping it in a centered container, and set the pagination limit to 5 rows per page.
+
 ## ⚠️ Proprietary Software Notice
 
 **This repository is presented for demonstration and portfolio purposes only.**

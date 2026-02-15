@@ -273,7 +273,7 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
       {/* Main Content - Header, Table, Pagination */}
       <main className="flex-1 flex flex-col h-full min-w-0 overflow-hidden relative p-4 md:p-8">
         <div className="flex-1 min-h-0 flex flex-col gap-6">
-          <div className="flex-1 min-h-0 flex flex-col gap-4 basis-1/2">
+          <div className="flex-[3] min-h-0 flex flex-col gap-4">
             <div className="flex-1 min-h-0">
               <DataTableContent
                 data={paginatedData}
@@ -300,7 +300,7 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
           
           <div 
             ref={chartRef}
-            className="flex-1 min-h-0 basis-1/2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden"
+            className="flex-[2] min-h-0 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden"
           >
             <DataChart data={chartData} />
           </div>
