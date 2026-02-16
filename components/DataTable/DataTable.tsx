@@ -94,6 +94,7 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
   const totalPages = Math.ceil(displayedData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedData = displayedData.slice(startIndex, startIndex + itemsPerPage);
+  const hasSelectedOnPage = paginatedData.some(item => selectedRowIds.has(item.id));
 
   const aggregateData = (items: DataItem[]): DataItem => {
     const years = Array.from({ length: 2024 - 2007 + 1 }, (_, i) => 2007 + i);
@@ -277,14 +278,9 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
             <div className="flex-1 min-h-0">
               <DataTableContent
                 data={paginatedData}
-                startIndex={startIndex}
-                itemsPerPage={itemsPerPage}
-                totalItems={displayedData.length}
                 selectedRowIds={selectedRowIds}
                 onToggleRow={toggleRowSelection}
                 onSelectAll={handleSelectAll}
-                onDeleteSelected={handleDeleteSelected}
-                onExport={handleExport}
                 isSidebarOpen={isSidebarOpen}
                 onToggleSidebar={() => setIsSidebarOpen(true)}
               />
@@ -294,6 +290,12 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={setCurrentPage}
+                startIndex={startIndex}
+                itemsPerPage={itemsPerPage}
+                totalItems={displayedData.length}
+                onExport={handleExport}
+                onDeleteSelected={handleDeleteSelected}
+                hasSelected={hasSelectedOnPage}
               />
             </div>
           </div>

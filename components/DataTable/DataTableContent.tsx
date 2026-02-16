@@ -3,91 +3,38 @@ import { DataItem } from '@/types';
 
 interface DataTableContentProps {
   data: DataItem[];
-  startIndex: number;
-  itemsPerPage: number;
-  totalItems: number;
   selectedRowIds: Set<number>;
   onToggleRow: (id: number) => void;
   onSelectAll: (checked: boolean) => void;
-  onDeleteSelected: () => void;
-  onExport: () => void;
   isSidebarOpen: boolean;
   onToggleSidebar: () => void;
 }
 
 export default function DataTableContent({
   data,
-  startIndex,
-  itemsPerPage,
-  totalItems,
   selectedRowIds,
   onToggleRow,
   onSelectAll,
-  onDeleteSelected,
-  onExport,
   isSidebarOpen,
   onToggleSidebar,
 }: DataTableContentProps) {
   const years = Array.from({ length: 2024 - 2007 + 1 }, (_, i) => 2007 + i);
 
   const allSelected = data.length > 0 && data.every(item => selectedRowIds.has(item.id));
-  const someSelected = data.some(item => selectedRowIds.has(item.id));
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 h-full flex flex-col">
-      {/* Table Stats */}
-      <div className="flex-none px-6 py-4 border-b border-gray-200 bg-gray-50/50">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            {!isSidebarOpen && (
-              <button 
-                onClick={onToggleSidebar}
-                className="hidden md:block p-1.5 bg-white border border-gray-200 text-gray-600 rounded-lg shadow-sm hover:text-indigo-600 hover:border-indigo-300 transition-all duration-200"
-                title="Show Filters"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                </svg>
-              </button>
-            )}
-            <p className="text-sm text-gray-600">
-              Showing <span className="font-semibold text-gray-900">{Math.min(startIndex + 1, totalItems)}</span> to{' '}
-              <span className="font-semibold text-gray-900">
-                {Math.min(startIndex + itemsPerPage, totalItems)}
-              </span>{' '}
-              of <span className="font-semibold text-gray-900">{totalItems}</span> results
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <button 
-              onClick={onExport}
-              className="p-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-200 active:scale-95" 
-              title="Export"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-              </svg>
-            </button>
-            <button 
-              onClick={onDeleteSelected}
-              disabled={!someSelected}
-              className={`p-2 rounded-lg transition-all duration-200 active:scale-95 ${
-                someSelected 
-                  ? 'text-red-500 hover:text-red-700 hover:bg-red-50 cursor-pointer' 
-                  : 'text-gray-300 cursor-not-allowed'
-              }`}
-              title="Delete Selected"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Responsive Table */}
       <div className="flex-1 overflow-auto custom-scrollbar relative">
+        {!isSidebarOpen && (
+          <button 
+            onClick={onToggleSidebar}
+            className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-lg shadow-sm hover:text-indigo-600 hover:border-indigo-300 transition-all duration-200 absolute top-3 left-3 z-50"
+            title="Show Filters"
+          >
+            <span className="w-1.5 h-5 bg-indigo-500 rounded-full"></span>
+            <span className="text-xs font-medium">Filters</span>
+          </button>
+        )}
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
