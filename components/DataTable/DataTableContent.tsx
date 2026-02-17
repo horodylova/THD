@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { DataItem } from '@/types';
 
 interface DataTableContentProps {
@@ -21,10 +21,17 @@ export default function DataTableContent({
   const years = Array.from({ length: 2024 - 2007 + 1 }, (_, i) => 2007 + i);
 
   const allSelected = data.length > 0 && data.every(item => selectedRowIds.has(item.id));
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
+  }, [data.length]);
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 h-full flex flex-col">
-      <div className="flex-1 overflow-auto custom-scrollbar relative">
+      <div ref={scrollContainerRef} className="flex-1 overflow-auto custom-scrollbar relative">
         {!isSidebarOpen && (
           <button 
             onClick={onToggleSidebar}
