@@ -54,7 +54,7 @@ export default function DataTableFilters({
         )}
       </div>
 
-      <div className="flex flex-col gap-6 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+      <div className="flex flex-col gap-6 flex-1 overflow-y-auto pr-2 pb-64 custom-scrollbar">
         {/* Measure Filter */}
         <div className="group">
           <MultiSelect

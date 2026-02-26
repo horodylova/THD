@@ -94,7 +94,6 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
   const totalPages = Math.ceil(displayedData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedData = displayedData.slice(startIndex, startIndex + itemsPerPage);
-  const hasSelectedOnPage = paginatedData.some(item => selectedRowIds.has(item.id));
 
   const aggregateData = (items: DataItem[]): DataItem => {
     const years = Array.from({ length: 2024 - 2007 + 1 }, (_, i) => 2007 + i);
@@ -282,7 +281,7 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
                 onToggleRow={toggleRowSelection}
                 onSelectAll={handleSelectAll}
                 isSidebarOpen={isSidebarOpen}
-                onToggleSidebar={() => setIsSidebarOpen(true)}
+                onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
               />
             </div>
             <div className="flex-none">
@@ -295,15 +294,11 @@ export default function DataTable({ initialData = [] }: DataTableProps) {
                 totalItems={displayedData.length}
                 onExport={handleExport}
                 onDeleteSelected={handleDeleteSelected}
-                hasSelected={hasSelectedOnPage}
+                hasSelected={selectedRowIds.size > 0}
               />
             </div>
           </div>
-          
-          <div 
-            ref={chartRef}
-            className="flex-[2] min-h-0 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden"
-          >
+          <div ref={chartRef} className="flex-[2] min-h-[300px] bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
             <DataChart data={chartData} />
           </div>
         </div>

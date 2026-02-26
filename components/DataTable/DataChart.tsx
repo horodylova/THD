@@ -75,8 +75,8 @@ export default function DataChart({ data = [] }: DataChartProps) {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 w-full">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="flex-1 w-full min-h-[250px]">
+        <ResponsiveContainer width="99%" height="100%" debounce={100}>
           <LineChart
             data={chartData}
             margin={{
