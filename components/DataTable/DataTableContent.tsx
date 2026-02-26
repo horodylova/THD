@@ -30,18 +30,18 @@ export default function DataTableContent({
   }, [data.length]);
 
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 h-full flex flex-col">
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 h-full flex flex-col relative">
+      {!isSidebarOpen && (
+        <button 
+          onClick={onToggleSidebar}
+          className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-lg shadow-sm hover:text-indigo-600 hover:border-indigo-300 transition-all duration-200 absolute top-3 left-3 z-[60]"
+          title="Show Filters"
+        >
+          <span className="w-1.5 h-5 bg-indigo-500 rounded-full"></span>
+          <span className="text-xs font-medium">Filters</span>
+        </button>
+      )}
       <div ref={scrollContainerRef} className="flex-1 overflow-auto custom-scrollbar relative">
-        {!isSidebarOpen && (
-          <button 
-            onClick={onToggleSidebar}
-            className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-lg shadow-sm hover:text-indigo-600 hover:border-indigo-300 transition-all duration-200 absolute top-3 left-3 z-50"
-            title="Show Filters"
-          >
-            <span className="w-1.5 h-5 bg-indigo-500 rounded-full"></span>
-            <span className="text-xs font-medium">Filters</span>
-          </button>
-        )}
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
