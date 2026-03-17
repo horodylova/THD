@@ -23,6 +23,19 @@ export default function DataTableContent({
   const allSelected = data.length > 0 && data.every(item => selectedRowIds.has(item.id));
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
+  const splitCommaList = (raw: string) =>
+    raw
+      .split(',')
+      .map(part => part.trim())
+      .filter(Boolean);
+
+  const formatListOrCount = (raw: string, label: string, maxItems = 5) => {
+    const parts = splitCommaList(raw);
+    if (parts.length === 0) return label;
+    if (parts.length > maxItems) return `${label} (${parts.length})`;
+    return parts.join(', ');
+  };
+
   useEffect(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
@@ -77,7 +90,7 @@ export default function DataTableContent({
                   </td>
                   <td className="px-6 py-4 sticky left-[64px] bg-white group-hover:bg-indigo-50 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] transition-colors duration-150">
                     <div className="text-sm font-medium text-gray-900 group-hover:text-indigo-700 transition-colors whitespace-normal max-w-[300px]">
-                      {item.cocNumber}, {item.state}, {item.measure}
+                      {formatListOrCount(item.cocNumber, 'CoCs')}, {formatListOrCount(item.state, 'States')}, {formatListOrCount(item.measure, 'Measures')}
                     </div>
                   </td>
                   {years.map((year) => (

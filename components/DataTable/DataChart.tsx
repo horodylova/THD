@@ -21,6 +21,21 @@ const formatNumber = (num: number) => {
   return num.toString();
 };
 
+const MAX_LABEL_ITEMS = 5;
+
+const splitCommaList = (raw: string) =>
+  raw
+    .split(',')
+    .map(part => part.trim())
+    .filter(Boolean);
+
+const formatListOrCount = (raw: string, label: string, maxItems = MAX_LABEL_ITEMS) => {
+  const parts = splitCommaList(raw);
+  if (parts.length === 0) return label;
+  if (parts.length > maxItems) return `${label} (${parts.length})`;
+  return parts.join(', ');
+};
+
 export default function DataChart({ data = [] }: DataChartProps) {
   const [isLogScale, setIsLogScale] = useState(false);
 
@@ -128,7 +143,7 @@ export default function DataChart({ data = [] }: DataChartProps) {
                 key={item.id}
                 type="monotone"
                 dataKey={`item-${item.id}`}
-                name={`${item.cocNumber} - ${item.state}`} // Legend label
+                name={`${formatListOrCount(item.cocNumber, 'CoCs')} - ${formatListOrCount(item.state, 'States')}`}
                 stroke={colors[index % colors.length]}
                 strokeWidth={2}
                 dot={{ r: 3, strokeWidth: 1 }}
